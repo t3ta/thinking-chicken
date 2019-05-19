@@ -11,16 +11,16 @@
 (test #t (xor #f #t))
 (test #f (xor #f #f))
 
-(define (halfAdder a b)
+(define (halfAdder a b c)
   (let ((carry (and a b))
         (sum (xor a b)))
     (list carry sum)))
 
 ; test for halfAdder
-(test-assert (equal? (list #f #f) (halfAdder #f #f)))
-(test-assert (equal? (list #f #t) (halfAdder #f #t)))
-(test-assert (equal? (list #f #t) (halfAdder #f #t)))
-(test-assert (equal? (list #t #f) (halfAdder #t #t)))
+(test-assert (equal? (list #f #f) (halfAdder #f #f '())))
+(test-assert (equal? (list #f #t) (halfAdder #f #t '())))
+(test-assert (equal? (list #f #t) (halfAdder #f #t '())))
+(test-assert (equal? (list #t #f) (halfAdder #t #t '())))
 
 (define-inline (carry-of adder)
   (list-ref adder 0))
@@ -29,8 +29,8 @@
   (list-ref adder 1))
 
 (define (fullAdder a b c)
-  (let ((halfAdder1 (halfAdder b c)))
-    (let ((halfAdder2 (halfAdder (sum-of halfAdder1) a)))
+  (let ((halfAdder1 (halfAdder b c '())))
+    (let ((halfAdder2 (halfAdder (sum-of halfAdder1) a '())))
       (list (or (carry-of halfAdder1) (carry-of halfAdder2)) (sum-of halfAdder2)))))
 
 ; test for fullAdder
@@ -49,9 +49,6 @@
     (letrec ((rec (lambda (x y c acc)
       (if (null? x)
         acc
-        (if (null? c)
-          (let ((halfResult (halfAdder (car x) (car y))))
-            (rec (cdr x) (cdr y) (carry-of halfResult) (append acc (list (sum-of halfResult)))))
-          (let ((fullResult (fullAdder (car x) (car y) c)))
-            (rec (cdr x) (cdr y) (carry-of fullResult) (append acc (list (sum-of fullResult))))))))))
+        (let ((result ((if (null? c) halfAdder fullAdder) (car x) (car y) c)))
+            (rec (cdr x) (cdr y) (carry-of result) (append acc (list (sum-of result)))))))))
       (rec a b '() '()))))
