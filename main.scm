@@ -43,12 +43,25 @@
 (test-assert (equal? (list #t #f) (fullAdder #t #t #f)))
 (test-assert (equal? (list #t #t) (fullAdder #t #t #t)))
 
+(define-inline (cdr-or-null lst)
+  (if (null? lst) '() (cdr lst)))
+
+(define-inline (car-or-false lst)
+  (if (null? lst) #f (car lst)))
+
 (define (adder a b)
-  (if (not (equal? (length a) (length b)))
-    (display "List lengths not equal.\n")
-    (letrec ((rec (lambda (x y c acc)
-      (if (null? x)
-        acc
-        (let ((result ((if (null? c) halfAdder fullAdder) (car x) (car y) c)))
-            (rec (cdr x) (cdr y) (carry-of result) (append acc (list (sum-of result)))))))))
-      (rec a b '() '()))))
+  (letrec ((rec (lambda (x y c acc)
+    (if (and (null? x) (null? y))
+      acc
+      (let ((result ((if (null? c) halfAdder fullAdder) (car-or-false x) (car-or-false y) c)))
+          (rec (cdr-or-null x) (cdr-or-null y) (carry-of result) (append acc (list (sum-of result)))))))))
+    (rec a b '() '())))
+
+; test for adder
+(test-assert (equal? (list #t #t #f) (adder (list #t #f #f) (list #f #t))))
+
+(define (incrementer a)
+  (adder a (list #t)))
+
+; test for incrementer
+(test-assert (equal? (list #f #t) (incrementer (list #t #f))))
