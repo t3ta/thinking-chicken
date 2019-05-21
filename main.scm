@@ -12,6 +12,30 @@
 (test #f (xor #f #f))
 (display "\n")
 
+(define (mux a b sel)
+  (or (and a (not sel)) (and b sel)))
+
+(display "- test for mux\n")
+(test #f (mux #f #f #f))
+(test #f (mux #f #t #f))
+(test #t (mux #t #f #f))
+(test #t (mux #t #t #f))
+(test #f (mux #f #f #t))
+(test #t (mux #f #t #t))
+(test #f (mux #t #f #t))
+(test #t (mux #t #t #t))
+(display "\n")
+
+(define (dMux in sel)
+  (list (and in (not sel)) (and in sel)))
+
+(display "- test for dMux\n")
+(test-assert (equal? (list #t #f) (dMux #t #f)))
+(test-assert (equal? (list #f #t) (dMux #t #t)))
+(test-assert (equal? (list #f #f) (dMux #f #f)))
+(test-assert (equal? (list #f #f) (dMux #f #f)))
+(display "\n")
+
 (define (halfAdder a b c)
   (let ((carry (and a b))
         (sum (xor a b)))
