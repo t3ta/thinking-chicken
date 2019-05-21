@@ -60,6 +60,18 @@
 (test-assert (equal? (list #t #t #t #t #t #t #t #t) (or-n (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f))))
 (display "\n")
 
+(define (or-n-way lst)
+  (letrec ((rec (lambda (lst res)
+    (if (null? lst)
+      res
+      (rec (cdr lst) (or (car lst) res))))))
+    (rec lst #f)))
+
+(display "- test for or-n-way\n")
+(test #f (or-n-way (list #f #f #f #f #f #f #f #f)))
+(test #t (or-n-way (list #f #f #f #f #f #t #f #f)))
+(display "\n")
+
 (display "- test for mux\n")
 (test #f (mux #f #f #f))
 (test #f (mux #f #t #f))
