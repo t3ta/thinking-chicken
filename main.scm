@@ -121,6 +121,21 @@
 (test-assert (equal? (list #t #t #t #t #t #t #t #f) (mux-8-way-n (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #t #t #t #t #f #f #f #f) (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) (list #t #f #f))))
 (display "\n")
 
+(define (d-mux-4-way in sel)
+  (let ((res (d-mux in (list-ref sel 0))))
+    (append (d-mux (list-ref res 0) (list-ref sel 1)) (d-mux (list-ref res 1) (list-ref sel 1)))))
+
+(display "- test for d-mux-4-way\n")
+(test-assert (equal? (list #t #f #f #f) (d-mux-4-way #t (list #f #f))))
+(test-assert (equal? (list #f #t #f #f) (d-mux-4-way #t (list #f #t))))
+(test-assert (equal? (list #f #f #t #f) (d-mux-4-way #t (list #t #f))))
+(test-assert (equal? (list #f #f #f #t) (d-mux-4-way #t (list #t #t))))
+(test-assert (equal? (list #f #f #f #f) (d-mux-4-way #f (list #f #f))))
+(test-assert (equal? (list #f #f #f #f) (d-mux-4-way #f (list #f #t))))
+(test-assert (equal? (list #f #f #f #f) (d-mux-4-way #f (list #t #f))))
+(test-assert (equal? (list #f #f #f #f) (d-mux-4-way #f (list #t #t))))
+(display "\n")
+
 (define (halfAdder a b c)
   (let ((carry (and a b))
         (sum (xor a b)))
