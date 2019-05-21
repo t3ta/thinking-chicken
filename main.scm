@@ -27,6 +27,27 @@
 (define (mux a b sel)
   (or (and a (not sel)) (and b sel)))
 
+(display "- test for mux\n")
+(test #f (mux #f #f #f))
+(test #f (mux #f #t #f))
+(test #t (mux #t #f #f))
+(test #t (mux #t #t #f))
+(test #f (mux #f #f #t))
+(test #t (mux #f #t #t))
+(test #f (mux #t #f #t))
+(test #t (mux #t #t #t))
+(display "\n")
+
+(define (d-mux in sel)
+  (list (and in (not sel)) (and in sel)))
+
+(display "- test for d-mux\n")
+(test-assert (equal? (list #t #f) (d-mux #t #f)))
+(test-assert (equal? (list #f #t) (d-mux #t #t)))
+(test-assert (equal? (list #f #f) (d-mux #f #f)))
+(test-assert (equal? (list #f #f) (d-mux #f #f)))
+(display "\n")
+
 (define (not-n lst)
   (letrec ((rec (lambda (lst acc)
     (if (null? lst)
@@ -60,6 +81,18 @@
 (test-assert (equal? (list #t #t #t #t #t #t #t #t) (or-n (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f))))
 (display "\n")
 
+(define (mux-n a b sel)
+  (letrec ((rec (lambda (a b acc)
+    (if (and (null? a) (null? b))
+      acc
+      (rec (cdr-or-null a) (cdr-or-null b) (cons (mux (car-or-false a) (car-or-false b) sel) acc))))))
+    (reverse (rec a b '()))))
+
+(display "- test for mux-n\n")
+(test-assert (equal? (list #t #t #t #t #t #t #t #t) (mux-n (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) #f)))
+(test-assert (equal? (list #t #t #t #t #f #f #f #f) (mux-n (list #t #t #t #t #t #t #t #t) (list #t #t #t #t #f #f #f #f) #t)))
+(display "\n")
+
 (define (or-n-way lst)
   (letrec ((rec (lambda (lst res)
     (if (null? lst)
@@ -72,25 +105,20 @@
 (test #t (or-n-way (list #f #f #f #f #f #t #f #f)))
 (display "\n")
 
-(display "- test for mux\n")
-(test #f (mux #f #f #f))
-(test #f (mux #f #t #f))
-(test #t (mux #t #f #f))
-(test #t (mux #t #t #f))
-(test #f (mux #f #f #t))
-(test #t (mux #f #t #t))
-(test #f (mux #t #f #t))
-(test #t (mux #t #t #t))
+(define (mux-4-way-n a b c d sel)
+  (mux-n (mux-n a b (list-ref sel 0)) (mux-n c d (list-ref sel 0)) (list-ref sel 1)))
+
+(display "- test for mux-4-way-n\n")
+(test-assert (equal? (list #t #t #t #t #t #t #t #f) (mux-4-way-n (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) (list #f #f))))
+(test-assert (equal? (list #t #t #t #t #f #f #f #f) (mux-4-way-n (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #t #t #t #t #f #f #f #f) (list #t #t))))
 (display "\n")
 
-(define (dMux in sel)
-  (list (and in (not sel)) (and in sel)))
+(define (mux-8-way-n a b c d e f g h sel)
+  (mux-n (mux-4-way-n a b c d (cdr sel)) (mux-4-way-n e f g h (cdr sel)) (car sel)))
 
-(display "- test for dMux\n")
-(test-assert (equal? (list #t #f) (dMux #t #f)))
-(test-assert (equal? (list #f #t) (dMux #t #t)))
-(test-assert (equal? (list #f #f) (dMux #f #f)))
-(test-assert (equal? (list #f #f) (dMux #f #f)))
+(display "- test for mux-8-way-n\n")
+(test-assert (equal? (list #t #t #t #t #t #t #t #f) (mux-8-way-n (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) (list #f #f #f))))
+(test-assert (equal? (list #t #t #t #t #t #t #t #f) (mux-8-way-n (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #t #t #t #t #f #f #f #f) (list #t #t #t #t #t #t #t #f) (list #f #f #f #f #f #f #f #f) (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f) (list #t #f #f))))
 (display "\n")
 
 (define (halfAdder a b c)
