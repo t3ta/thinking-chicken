@@ -1,5 +1,17 @@
 (import test)
 
+(define-inline (carry-of adder)
+  (list-ref adder 0))
+
+(define-inline (sum-of adder)
+  (list-ref adder 1))
+
+(define-inline (cdr-or-null lst)
+  (if (null? lst) '() (cdr lst)))
+
+(define-inline (car-or-false lst)
+  (if (null? lst) #f (car lst)))
+
 (define (xor a b)
   (or
     (and a (not b))
@@ -14,6 +26,39 @@
 
 (define (mux a b sel)
   (or (and a (not sel)) (and b sel)))
+
+(define (not-n lst)
+  (letrec ((rec (lambda (lst acc)
+    (if (null? lst)
+      acc
+      (rec (cdr lst) (cons (not (car lst)) acc))))))
+    (reverse (rec lst '()))))
+
+(display "- test for not-n\n")
+(test-assert (equal? (list #f #f #f #f #f #f #f #f) (not-n (list #t #t #t #t #t #t #t #t))))
+(display "\n")
+
+(define (and-n a b)
+  (letrec ((rec (lambda (a b acc)
+    (if (and (null? a) (null? b))
+      acc
+      (rec (cdr-or-null a) (cdr-or-null b) (cons (and (car-or-false a) (car-or-false b)) acc))))))
+  (reverse (rec a b '()))))
+
+(display "- test for and-n\n")
+(test-assert (equal? (list #f #f #f #f #f #f #f #f) (and-n (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f))))
+(display "\n")
+
+(define (or-n a b)
+  (letrec ((rec (lambda (a b acc)
+    (if (and (null? a) (null? b))
+      acc
+      (rec (cdr-or-null a) (cdr-or-null b) (cons (or (car-or-false a) (car-or-false b)) acc))))))
+  (reverse (rec a b '()))))
+
+(display "- test for or-n\n")
+(test-assert (equal? (list #t #t #t #t #t #t #t #t) (or-n (list #t #t #t #t #t #t #t #t) (list #f #f #f #f #f #f #f #f))))
+(display "\n")
 
 (display "- test for mux\n")
 (test #f (mux #f #f #f))
@@ -48,12 +93,6 @@
 (test-assert (equal? (list #t #f) (halfAdder #t #t '())))
 (display "\n")
 
-(define-inline (carry-of adder)
-  (list-ref adder 0))
-
-(define-inline (sum-of adder)
-  (list-ref adder 1))
-
 (define (fullAdder a b c)
   (let ((halfAdder1 (halfAdder b c '())))
     (let ((halfAdder2 (halfAdder (sum-of halfAdder1) a '())))
@@ -69,12 +108,6 @@
 (test-assert (equal? (list #t #f) (fullAdder #t #t #f)))
 (test-assert (equal? (list #t #t) (fullAdder #t #t #t)))
 (display "\n")
-
-(define-inline (cdr-or-null lst)
-  (if (null? lst) '() (cdr lst)))
-
-(define-inline (car-or-false lst)
-  (if (null? lst) #f (car lst)))
 
 (define (adder a b)
   (letrec ((rec (lambda (x y c acc)
