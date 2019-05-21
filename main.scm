@@ -5,22 +5,24 @@
     (and a (not b))
     (and (not a) b)))
 
-; test for aor
+(display "- test for xor\n")
 (test #f (xor #t #t))
 (test #t (xor #t #f))
 (test #t (xor #f #t))
 (test #f (xor #f #f))
+(display "\n")
 
 (define (halfAdder a b c)
   (let ((carry (and a b))
         (sum (xor a b)))
     (list carry sum)))
 
-; test for halfAdder
+(display "- test for halfAdder\n")
 (test-assert (equal? (list #f #f) (halfAdder #f #f '())))
 (test-assert (equal? (list #f #t) (halfAdder #f #t '())))
 (test-assert (equal? (list #f #t) (halfAdder #f #t '())))
 (test-assert (equal? (list #t #f) (halfAdder #t #t '())))
+(display "\n")
 
 (define-inline (carry-of adder)
   (list-ref adder 0))
@@ -33,7 +35,7 @@
     (let ((halfAdder2 (halfAdder (sum-of halfAdder1) a '())))
       (list (or (carry-of halfAdder1) (carry-of halfAdder2)) (sum-of halfAdder2)))))
 
-; test for fullAdder
+(display "- test for fullAdder\n")
 (test-assert (equal? (list #f #f) (fullAdder #f #f #f)))
 (test-assert (equal? (list #f #t) (fullAdder #f #f #t)))
 (test-assert (equal? (list #f #t) (fullAdder #f #t #f)))
@@ -42,6 +44,7 @@
 (test-assert (equal? (list #t #f) (fullAdder #t #f #t)))
 (test-assert (equal? (list #t #f) (fullAdder #t #t #f)))
 (test-assert (equal? (list #t #t) (fullAdder #t #t #t)))
+(display "\n")
 
 (define-inline (cdr-or-null lst)
   (if (null? lst) '() (cdr lst)))
@@ -57,11 +60,16 @@
           (rec (cdr-or-null x) (cdr-or-null y) (carry-of result) (append acc (list (sum-of result)))))))))
     (rec a b '() '())))
 
-; test for adder
+(display "- test for adder\n")
+(test-assert (equal? (list #t #f) (adder (list #f #f) (list #t #f))))
 (test-assert (equal? (list #t #t #f) (adder (list #t #f #f) (list #f #t))))
+(test-assert (equal? (list #t #t #f) (adder (list #f #t) (list #t #f #f))))
+(test-assert (equal? (list #t #t #f #f #f #f #f #t ) (adder (list #f #t) (list #t #f #f #f #f #f #f #t))))
+(display "\n")
 
 (define (incrementer a)
   (adder a (list #t)))
 
-; test for incrementer
+(display "- test for incrementer\n")
 (test-assert (equal? (list #f #t) (incrementer (list #t #f))))
+(display "\n")
